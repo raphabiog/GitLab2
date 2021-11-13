@@ -1,5 +1,6 @@
 plugins {
    id 'java'
+   id "org.xbib.gradle.plugin.git" version "2.0.0"
 }
 
 java {
@@ -24,6 +25,54 @@ test {
 task reports{
 	javadoc.state.executed
 	test.state.executed
+}
+
+task clonePages() {
+    doLast {
+        mkdir 'build/gh-pages'
+        def thisRepo = rootProject.projectDir.toString()
+        def pagesDir = "$buildDir/gh-pages"
+   //     project.delete {
+   //         delete pagesDir
+   //     }
+        def grgit = git.clone {
+            dir = pagesDir
+            uri = 'file:' + thisRepo
+            bare = false
+            refToCheckout = 'gh-pages'
+        }
+        grgit.checkout {
+            branch = 'gh-pages'
+        }
+    }
+}
+
+task deployReports (type: Copy, dependsOn: ['reports' /*, 'clonePages'*/]) {
+
+	into ("$buildDir")
+	
+	from("$buildDir/docs/"){
+		into ("/gh-pages/docs/")
+	}
+	
+	from("$buildDir/reports/"){
+		into ("/gh-pages/reports/")
+	}
+
+	doLast {
+        def pagesDir = "$buildDir/gh-pages"
+        def grgit = git.open {
+            dir = pagesDir + "/.git"
+        }
+        grgit.add (update: false, patterns: ['reports/'])
+        grgit.add (update: true, patterns: ['reports/'])
+        grgit.commit {
+            message = "Updating web pages"
+        }
+        grgit.push {}
+    }
+
+	
 }
 
 

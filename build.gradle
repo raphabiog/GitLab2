@@ -32,9 +32,9 @@ task clonePages() {
         mkdir 'build/gh-pages'
         def thisRepo = rootProject.projectDir.toString()
         def pagesDir = "$buildDir/gh-pages"
-  //      project.delete {
-  //          delete pagesDir
-  //      }
+        project.delete {
+            delete pagesDir
+        }
         def grgit = git.clone {
             dir = pagesDir
             uri = 'file:' + thisRepo
@@ -47,7 +47,7 @@ task clonePages() {
     }
 }
 
-task deployReports (type: Copy, dependsOn: ['reports' /*, 'clonePages'*/]) {
+task deployReports (type: Copy, dependsOn: ['reports' , 'clonePages']) {
 
 	into ("$buildDir")
 	
@@ -66,6 +66,8 @@ task deployReports (type: Copy, dependsOn: ['reports' /*, 'clonePages'*/]) {
         }
         grgit.add (update: false, patterns: ['reports/'])
         grgit.add (update: true, patterns: ['reports/'])
+        grgit.add (update: false, patterns: ['docs/'])
+        grgit.add (update: true, patterns: ['docs/'])
         grgit.commit {
             message = "Updating web pages"
         }

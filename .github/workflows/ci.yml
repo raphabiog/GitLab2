@@ -22,7 +22,7 @@ jobs:
       working-directory: ./build/gh-pages
       run:
         |
-        ../../../gradlew build
-        ../../../gradlew javadoc
-        ../../../gradlew deployReports
+        ./gradlew build
+        ./gradlew javadoc
+        ./gradlew deployReports
       

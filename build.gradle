@@ -33,22 +33,19 @@ task clonePages() {
         def thisRepo = rootProject.projectDir.toString()
         def pagesDir = "$buildDir/gh-pages"
         
-        def file1 = file('build/gh-pages')
-        if (!file1.exists())
-        {
-	        def grgit = git.clone {
-	            dir = pagesDir
-	            uri = 'file:' + thisRepo
-	            bare = false
-	            refToCheckout = 'gh-pages'
-	        }
-        
-        
+        def file1 = file("$buildDir/gh-pages")
+        project.delete {
+            delete pagesDir
+        }
+	    def grgit = git.clone {
+	        dir = pagesDir
+	        uri = 'file:' + thisRepo
+	        bare = false
+	        refToCheckout = 'gh-pages'
+	    }
         grgit.checkout {
             branch = 'gh-pages'
         }
-        }
-        
     }
 }
 

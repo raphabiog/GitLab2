@@ -22,35 +22,7 @@ test {
     useJUnitPlatform()
 }
 
-task reports{
-	javadoc.state.executed
-	test.state.executed
-}
-
-task clonePages() {
-    doLast {
-        mkdir 'build/gh-pages'
-        def thisRepo = rootProject.projectDir.toString()
-        def pagesDir = "$buildDir/gh-pages"
-        
-        def file1 = file("$buildDir/gh-pages")
-        project.delete {
-            delete pagesDir
-        }
-	    def grgit = git.clone {
-	        dir = pagesDir
-	        uri = 'file:' + thisRepo
-	        bare = false
-	        refToCheckout = 'gh-pages'
-	    }
-        grgit.checkout {
-            branch = 'gh-pages'
-        }
-    }
-}
-
-task deployReports (type: Copy, dependsOn: ['reports' , 'clonePages']) {
-
+task copyDocsReports(type: Copy) {
 	into ("$buildDir")
 	
 	from("$buildDir/docs/"){
@@ -60,12 +32,29 @@ task deployReports (type: Copy, dependsOn: ['reports' , 'clonePages']) {
 	from("$buildDir/reports/"){
 		into ("/gh-pages/reports/")
 	}
+}
+
+task reports (dependsOn: ['javadoc' , 'test' , 'copyDocsReports']) {
+	description 'Generate Reports'
+}
+
+task deployReports (type: Copy, dependsOn: ['reports']) {
 
 	doLast {
-        def pagesDir = "$buildDir/gh-pages"
-        def grgit = git.open {
-            dir = pagesDir + "/.git"
+		mkdir 'build/gh-pages'
+		def thisRepo = rootProject.projectDir.toString()
+		def pagesDir = "$buildDir/gh-pages"
+		def grgit = git.clone {
+			dir = pagesDir
+            uri = 'file:' + thisRepo
+            bare = false
+            refToCheckout = 'gh-pages'
         }
+        grgit.checkout {
+            branch = 'gh-pages'
+        }
+	
+
         grgit.add (update: false, patterns: ['reports/'])
         grgit.add (update: true, patterns: ['reports/'])
         grgit.add (update: false, patterns: ['docs/'])
@@ -76,8 +65,8 @@ task deployReports (type: Copy, dependsOn: ['reports' , 'clonePages']) {
         grgit.push {}
     }
 
-	
 }
+
 
 
 

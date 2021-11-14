@@ -22,7 +22,6 @@ jobs:
       run:
         |
         ./gradlew build
-        ./gradlew test
         ./gradlew javadoc
         ./gradlew deployReports
       
